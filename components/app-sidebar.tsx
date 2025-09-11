@@ -89,7 +89,7 @@ export function AppSidebar({
                 <Trash2 className="h-4 w-4 text-sidebar-primary-foreground" />
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-semibold text-sidebar-foreground">SecureWipe Pro</span>
+                <span className="text-sm font-semibold text-sidebar-foreground">DropDrive</span>
                 <span className="text-xs text-muted-foreground">v2.1.0</span>
               </div>
             </div>

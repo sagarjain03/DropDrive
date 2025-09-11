@@ -1,13 +1,19 @@
 {
-  "name": "my-v0-project",
+  "name": "drop-drive",
   "version": "0.1.0",
   "private": true,
   "main": "electron/main.js",
-  "scripts": {
-    "dev": "next dev",
-    "electron": "cross-env NODE_ENV=development electron .",
-    "dev:all": "concurrently \"next dev\" \"wait-on http://localhost:3000 && pnpm electron\""
-  },
+"scripts": {
+  "dev": "next dev",
+  "electron": "cross-env NODE_ENV=development electron .",
+  "dev:all": "concurrently \"next dev\" \"wait-on http://localhost:3000 && pnpm electron\"",
+
+  "build:next": "next build && next export -o out",  
+  "build:electron": "cross-env NODE_ENV=production electron .",  
+  "build": "next build",  
+
+  "dist": "electron-builder"
+},
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "1.2.2",
