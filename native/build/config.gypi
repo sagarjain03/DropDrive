@@ -494,6 +494,16 @@
     "nodedir": "C:\\Users\\Hp\\AppData\\Local\\node-gyp\\Cache\\22.18.0",
     "python": "C:\\Users\\Hp\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
     "standalone_static_library": 1,
-    "msbuild_path": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe"
+    "msbuild_path": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
+    "user_agent": "npm/10.9.3 node/v22.18.0 win32 x64 workspaces/false",
+    "userconfig": "C:\\Users\\Hp\\.npmrc",
+    "prefix": "C:\\Users\\Hp\\AppData\\Roaming\\npm",
+    "npm_version": "10.9.3",
+    "node_gyp": "C:\\Program Files\\nodejs\\node_modules\\npm\\node_modules\\node-gyp\\bin\\node-gyp.js",
+    "local_prefix": "C:\\Users\\Hp\\Desktop\\Disk_cleaner\\DropDrive_forked\\native",
+    "init_module": "C:\\Users\\Hp\\.npm-init.js",
+    "global_prefix": "C:\\Users\\Hp\\AppData\\Roaming\\npm",
+    "globalconfig": "C:\\Users\\Hp\\AppData\\Roaming\\npm\\etc\\npmrc",
+    "cache": "C:\\Users\\Hp\\AppData\\Local\\npm-cache"
   }
 }
