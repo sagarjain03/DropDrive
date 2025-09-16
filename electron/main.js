@@ -29,3 +29,10 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
+
+const { ipcMain } = require('electron');
+const { wipeDrive } = require('./wipeController'); // if you exported this via controller
+
+ipcMain.handle('test-addon', async () => {
+  return wipeDrive(); // This should call the C++ addon and return its output
+});

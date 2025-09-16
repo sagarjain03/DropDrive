@@ -8,3 +8,8 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.on(channel, (event, ...args) => func(...args));
   }
 });
+
+// Render process or preload.js
+window.electron.ipcRenderer.invoke('test-addon').then(result => {
+  alert(result); // Should alert your C++ message
+});
