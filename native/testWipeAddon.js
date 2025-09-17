@@ -1,10 +1,10 @@
 const wipeAddon = require('./build/Release/wipeAddon.node');
-// console.log(wipeAddon);
-// Overwrite file with zeroes
-// console.log(wipeAddon.wipeFile('text1.txt', 'zero')); // Wipe 10 KB
+// const usbPath = '\\\\.\\PhysicalDrive1'
+// console.log(wipeAddon.wipeFile('./test/test_video.mp4', 'nist'));
+// console.log(wipeAddon.wipeFile('./test/test_exe.exe', 'nistzero'));
+// console.log(wipeAddon.wipeFile('./test/test_img.png', 'dod'));
+// console.log(wipeAddon.wipeFile('./test/test_zip.zip', 'zero'));
+console.log(wipeAddon.wipeFile('./test', 'nistzero'));
+// console.log(wipeAddon.wipeFile('./test/test_pdf.pdf', 'random'));
 
-// Overwrite file with random data
-const usbPath = '\\\\.\\PhysicalDrive1'
-console.log(wipeAddon.wipeFile(usbPath, 'nistzero'));
-// console.log(wipeAddon.wipeFile('text.txt', 'dod'));
 
