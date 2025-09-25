@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -22,16 +22,33 @@ import {
 
 type WipeStatus = "idle" | "running" | "paused" | "completed" | "error"
 
+
+
+function formatBytes(bytes: number) {
+  if (!bytes) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 export function WipeProcess() {
   const [wipeStatus, setWipeStatus] = useState<WipeStatus>("idle")
   const [progress, setProgress] = useState(0)
-  const [selectedDrive, setSelectedDrive] = useState("")
   const [wipeMethod, setWipeMethod] = useState("dod-5220")
+  const [drives, setDrives] = useState<any[]>([]);
+  const [loadingDrives, setLoadingDrives] = useState(true);
+  const [selectedDrive, setSelectedDrive] = useState<string | null>(null);
 
-  const drives = [
-    { id: "drive-e", name: "External HDD (E:)", size: "2 TB", type: "HDD" },
-    { id: "drive-f", name: "USB Drive (F:)", size: "64 GB", type: "USB" },
-  ]
+  useEffect(() => {
+    // @ts-ignore (Electron preload should expose this)
+    window.api.getDrives().then((result: any[]) => {
+      setDrives(result);
+      setLoadingDrives(false);
+    });
+  }, []);
+
+
 
   const wipeMethods = [
     { id: "dod-5220", name: "DoD 5220.22-M (3 passes)", description: "US Department of Defense standard" },
@@ -118,6 +135,22 @@ export function WipeProcess() {
     }
   }
 
+  {
+    selectedDrive && (() => {
+      const drive = drives.find(d => d.device === selectedDrive);
+      return (
+        <div className="my-2 p-2 border rounded">
+          <div><b>Name:</b> {drive?.description}</div>
+          <div><b>Device:</b> {drive?.device}</div>
+          <div><b>Size:</b> {formatBytes(drive?.size)}</div>
+          <div><b>Type:</b> {drive?.busType}{drive?.isRemovable ? ' (Removable)' : ''}</div>
+          <div><b>Mountpoints:</b> {(drive?.mountpoints || []).map((mp: { path: string }) => mp.path).join(', ')}</div>
+        </div>
+      );
+    })()
+  }
+
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -141,24 +174,34 @@ export function WipeProcess() {
               <CardDescription>Choose the storage device to securely wipe</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Select value={selectedDrive} onValueChange={setSelectedDrive} disabled={wipeStatus === "running"}>
+              <Select
+                value={selectedDrive || undefined}
+                onValueChange={setSelectedDrive}
+                disabled={wipeStatus === 'running'}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a drive to wipe" />
                 </SelectTrigger>
                 <SelectContent>
-                  {drives.map((drive) => (
-                    <SelectItem key={drive.id} value={drive.id}>
-                      <div className="flex items-center gap-2 w-full">
-                        <HardDrive className="h-4 w-4 flex-shrink-0" />
-                        <span className="flex-1 truncate">{drive.name}</span>
-                        <Badge variant="outline" className="ml-auto flex-shrink-0">
-                          {drive.size}
-                        </Badge>
-                      </div>
-                    </SelectItem>
-                  ))}
+                  {loadingDrives ? <div>Loading drives...</div> : drives.map((drive, idx) =>
+                    drive.mountpoints.map((mp: { path: string, total?: number, free?: number }, midx: number) => (
+                      <SelectItem key={drive.device + mp.path} value={mp.path}>
+                        <div className="flex items-center gap-2 w-full">
+                          <span className="flex-1 truncate">{drive.description || drive.device} [{mp.path}]</span>
+                          <Badge variant="outline" className="ml-auto flex-shrink-0">
+                            {formatBytes(mp.total || drive.size)} total
+                          </Badge>
+                          <Badge variant="outline" className="ml-2 flex-shrink-0">
+                            {formatBytes(mp.free ?? 0)} free
+                          </Badge>
+                          <Badge variant="outline" className="ml-2 flex-shrink-0 ">{drive.busType}</Badge>
+                        </div>
+                      </SelectItem>
+                    )))
+                  }
                 </SelectContent>
               </Select>
+
 
               {selectedDrive && (
                 <div className="p-4 rounded-lg border border-border bg-card/50">

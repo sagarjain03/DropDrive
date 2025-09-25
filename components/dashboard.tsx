@@ -5,8 +5,77 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { HardDrive, Monitor, Cpu, MemoryStick, Shield, Clock, CheckCircle2, AlertTriangle } from "lucide-react"
+import React, { useEffect, useState } from 'react';
+
+// Utility for bytes to GB/MB
+type Volume = {
+  fs: string;      // e.g. 'C:' or 'D:'
+  size: number;    // total bytes
+  used: number;    // used bytes
+  mount: string;   // mount path, should equal fs
+  type: string;    // 'NTFS', 'FAT32', etc.
+  label?: string;
+};
+
+function formatBytes(bytes: number) {
+  if (!bytes) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+export const VolumesGrid: React.FC = () => {
+  const [volumes, setVolumes] = useState<Volume[]>([]);
+
+  useEffect(() => {
+    // @ts-ignore
+    window.api.getVolumes().then(setVolumes);
+  }, []);
+
+  return (
+    <div className="grid md:grid-cols-3 gap-4">
+      {volumes.map((vol, idx) => (
+      <div
+        key={idx}
+        className="bg-black p-4 rounded-lg flex flex-col gap-2 border-1"
+        style={{ borderColor: "#464747ff" }} // Tailwind green-500
+      >
+        <div className="flex items-center justify-between">
+        <div className="font-medium">{vol.label || 'Drive ' + vol.mount}</div>
+        <span className="px-2 py-1 rounded text-xs bg-muted">{vol.type}</span>
+        </div>
+        <div className="font-bold text-lg">{vol.fs}</div>
+        <div className="text-xs text-muted-foreground">
+        Used: {formatBytes(vol.used)} / {formatBytes(vol.size)}
+        </div>
+        <div className="w-full bg-muted rounded h-2 overflow-hidden">
+        <div
+          className="bg-primary h-2"
+          style={{ width: `${Math.round((vol.used / vol.size) * 100)}%` }}
+        />
+        </div>
+      </div>
+      ))}
+    </div>
+  );
+};
+
+
 
 export function Dashboard() {
+  type SystemInfo = {
+    cpu: string;
+    memory: string;
+    os: string;
+    storage: { type: string; size: number; name: string }[];
+  };
+
+  const [sysInfo, setSysInfo] = useState<SystemInfo | null>(null);
+
+  useEffect(() => {
+    // @ts-ignore
+    window.api.getSystemInfo().then(setSysInfo);
+  }, []);
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -82,38 +151,45 @@ export function Dashboard() {
             </CardTitle>
             <CardDescription>Current system specifications and status</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             <div className="grid gap-3">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <Cpu className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-card-foreground">Processor</span>
                 </div>
-                <span className="text-sm font-medium text-card-foreground">Intel Core i7-12700K</span>
+                <span className="text-sm font-medium text-card-foreground">
+                  {sysInfo?.cpu || "Loading..."}
+                </span>
               </div>
-
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <MemoryStick className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-card-foreground">Memory</span>
                 </div>
-                <span className="text-sm font-medium text-card-foreground">32 GB DDR4</span>
+                <span className="text-sm font-medium text-card-foreground">
+                  {sysInfo?.memory || "Loading..."}
+                </span>
               </div>
-
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <HardDrive className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-card-foreground">Storage</span>
                 </div>
-                <span className="text-sm font-medium text-card-foreground">2 TB NVMe SSD</span>
+                <span className="text-sm font-medium text-card-foreground">
+                  {sysInfo?.storage
+                    ? sysInfo.storage.map(d => `${d.name.split(' ')[0]} (${Math.round(d.size / 1024 ** 3)} GB)`).join(', ')
+                    : "Loading..."}
+                </span>
               </div>
-
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <Shield className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-card-foreground">OS</span>
                 </div>
-                <span className="text-sm font-medium text-card-foreground">Windows 11 Pro</span>
+                <span className="text-sm font-medium text-card-foreground">
+                  {sysInfo?.os || "Loading..."}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -167,55 +243,7 @@ export function Dashboard() {
           <CardDescription>Available drives for secure wiping operations</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-            <div className="p-4 rounded-lg border border-border bg-card/50">
-              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-                <span className="text-sm font-medium text-card-foreground">Primary SSD (C:)</span>
-                <Badge variant="outline" className="text-xs">
-                  System
-                </Badge>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Used: 245 GB</span>
-                  <span>Total: 512 GB</span>
-                </div>
-                <Progress value={48} className="h-2" />
-              </div>
-            </div>
-
-            <div className="p-4 rounded-lg border border-border bg-card/50">
-              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-                <span className="text-sm font-medium text-card-foreground">External HDD (E:)</span>
-                <Badge variant="secondary" className="text-xs bg-secondary text-secondary-foreground">
-                  Available
-                </Badge>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Used: 1.2 TB</span>
-                  <span>Total: 2 TB</span>
-                </div>
-                <Progress value={60} className="h-2" />
-              </div>
-            </div>
-
-            <div className="p-4 rounded-lg border border-border bg-card/50">
-              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-                <span className="text-sm font-medium text-card-foreground">USB Drive (F:)</span>
-                <Badge variant="secondary" className="text-xs bg-secondary text-secondary-foreground">
-                  Available
-                </Badge>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Used: 8 GB</span>
-                  <span>Total: 64 GB</span>
-                </div>
-                <Progress value={12} className="h-2" />
-              </div>
-            </div>
-          </div>
+          <VolumesGrid />
         </CardContent>
       </Card>
     </div>
