@@ -10,6 +10,9 @@
 #include "wipeMethods/nistWipe.cpp"
 #include "wipeMethods/nistZeroWipe.cpp"
 #include "wipeMethods/dodWipe.cpp"
+#include "wipeMethods/purge/ataSecureErase.cpp"
+#include "wipeMethods/purge/cryptoErase.cpp"
+#include "wipeMethods/purge/nvmeSanitize.cpp"
 // #include "wipeMethods/dod.cpp"      <-- Add later for DoD, NIST, Gutmann, etc.
 
 Napi::Value WipeFile(const Napi::CallbackInfo& info) { 
@@ -23,7 +26,10 @@ Napi::Value WipeFile(const Napi::CallbackInfo& info) {
     std::string method = info[1].As<Napi::String>();
 
     bool result = false;
-    if (method == "nist")          result = nistWipe(path);
+    if (device.type === "NVMe") use nvmeSanitize();
+else if (device.type === "SATA-SSD") use ataSecureErase();
+else if (device.supportsSED) use cryptoErase();
+    else if (method == "nist")          result = nistWipe(path);
     else if (method == "nistzero") result = nistZeroWipe(path);
     else if (method == "dod")      result = dodWipe(path);
     else if (method == "zero") {

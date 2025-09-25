@@ -1,6 +1,10 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
+  getSystemInfo: () => ipcRenderer.invoke('get-system-info'),
+  getVolumes: () => ipcRenderer.invoke('get-volumes'),
+  getDrives: () => ipcRenderer.invoke('list-drives'),
+  startWipe: (wipeParams) => ipcRenderer.invoke('start-wipe', wipeParams),
   send: (channel, data) => {
     ipcRenderer.send(channel, data);
   },

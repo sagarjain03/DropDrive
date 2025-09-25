@@ -1,8 +1,4 @@
 const { startWipe } = require('./wipeController');
 
-startWipe(
-  { device: '/dev/sdb', method: 'dod', label: 'USB Drive' },
-  progress => console.log('Progress:', progress)
-).then(result => {
-  console.log('Final wipe result:', result);
-});
+startWipe({ device: '../native/test/test_img.png', method: 'zero', label: 'Test File' })
+  .then(result => console.log(result));

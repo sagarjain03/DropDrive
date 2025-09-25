@@ -1,5 +1,6 @@
 // electron/deviceManager.js
 const drivelist = require('drivelist');
+const disk = require('diskusage');
 
 /**
  * Lists all drives connected to the system.
@@ -8,6 +9,19 @@ const drivelist = require('drivelist');
 async function listDrives() {
   try {
     const drives = await drivelist.list();
+    // For each mountpoint, get free space
+    for (const drive of drives) {
+      for (const mp of drive.mountpoints) {
+        try {
+          const { available, free, total } = disk.checkSync(mp.path);
+          mp.total = total;
+          mp.free = free;
+        } catch (e) {
+          mp.total = null;
+          mp.free = null;
+        }
+      }
+    }
     // Map to return info useful for your UI and backend:
     return drives.map(drive => ({
       device: drive.device,                // e.g. '\\\\.\\PhysicalDrive1' (Win), '/dev/sdb' (Linux)
